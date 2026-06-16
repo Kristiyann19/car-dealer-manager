@@ -1,9 +1,11 @@
+using CarDealerManager.Common.AppSettings;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+AppSettingsProvider.AddAppSettings(builder.Configuration);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

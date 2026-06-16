@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="CarDealerManager/CarDealerManager.csproj" />
+  <Project Path="CarDealerManager.Common/CarDealerManager.Common.csproj" />
+  <Project Path="CarDealerManager.Domain/CarDealerManager.Domain.csproj" />
+  <Project Path="CarDealerManager/CarDealerManager.WebAPI.csproj" />
 </Solution>
