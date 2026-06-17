@@ -1,4 +1,5 @@
 using CarDealerManager.Common.AppSettings;
+using CarDealerManager.WebAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 AppSettingsProvider.AddAppSettings(builder.Configuration);
+builder.Services.ConfigureDbContextService();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

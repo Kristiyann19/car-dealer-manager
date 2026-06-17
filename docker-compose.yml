@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: car-dealer-manager-db
+    environment:
+      POSTGRES_DB: CarDealerManager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abbaty
+    ports:
+      - "5433:5432"
+    volumes:
+      - car_dealer_manager_data:/var/lib/postgresql/data
+
+volumes:
+  car_dealer_manager_data:
