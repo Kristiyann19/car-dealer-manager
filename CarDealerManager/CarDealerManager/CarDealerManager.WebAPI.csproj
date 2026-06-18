@@ -17,6 +17,11 @@
   <ItemGroup>
     <ProjectReference Include="..\CarDealerManager.Common\CarDealerManager.Common.csproj" />
     <ProjectReference Include="..\CarDealerManager.Domain\CarDealerManager.Domain.csproj" />
+    <ProjectReference Include="..\CarDealerManager.Infrastructure\CarDealerManager.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

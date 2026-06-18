@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Service\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CarDealerManager.Application\CarDealerManager.Application.csproj" />
+    <ProjectReference Include="..\CarDealerManager.Domain\CarDealerManager.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

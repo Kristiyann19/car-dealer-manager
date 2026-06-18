@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 AppSettingsProvider.AddAppSettings(builder.Configuration);
 builder.Services.ConfigureDbContextService();
+builder.Services.ConfigureRepositories();
+builder.Services.ConfigureServices();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
