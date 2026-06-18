@@ -1,9 +1,9 @@
-﻿namespace CarDealerManager.Domain.Entities
-{
-    public class Expense
-    {
-        public int Id { get; set; }
+﻿using CarDealerManager.Domain.Entities.Base;
 
+namespace CarDealerManager.Domain.Entities
+{
+    public class Expense : Entity
+    {
         public int CarId { get; set; }
         public Car Car { get; set; } = null!;
 

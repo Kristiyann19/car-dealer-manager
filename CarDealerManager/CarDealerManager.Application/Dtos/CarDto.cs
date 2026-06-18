@@ -1,9 +1,9 @@
-﻿using CarDealerManager.Domain.Entities.Base;
-
-namespace CarDealerManager.Domain.Entities
+﻿namespace CarDealerManager.Application.Dtos
 {
-    public class Car : Entity
+    public class CarDto
     {
+        public int Id { get; set; }
+
         public string Brand { get; set; }
         public string Model { get; set; }
         public int Year { get; set; }
@@ -18,6 +18,6 @@ namespace CarDealerManager.Domain.Entities
 
         public string Status { get; set; } = "Purchased"; //make enum
 
-        public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+        public ICollection<ExpenseDto> Expenses { get; set; } = new List<ExpenseDto>();
     }
 }

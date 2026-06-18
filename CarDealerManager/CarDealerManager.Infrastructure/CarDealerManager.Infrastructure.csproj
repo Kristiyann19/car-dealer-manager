@@ -6,10 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Service\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\CarDealerManager.Application\CarDealerManager.Application.csproj" />
     <ProjectReference Include="..\CarDealerManager.Domain\CarDealerManager.Domain.csproj" />
   </ItemGroup>
