@@ -1,4 +1,17 @@
 services:
+  api:
+    build:
+      context: ./CarDealerManager
+      dockerfile: Dockerfile
+    container_name: car-dealer-manager-api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      mainDbConnectionString: "Host=db;Port=5432;Username=postgres;Password=abbaty;Database=CarDealerManager"
+    depends_on:
+      - db
+
   db:
     image: postgres:16
     container_name: car-dealer-manager-db
