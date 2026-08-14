@@ -1,6 +1,23 @@
 @CarDealerManager_HostAddress = http://localhost:5250
 
-GET {{CarDealerManager_HostAddress}}/weatherforecast/
+GET {{CarDealerManager_HostAddress}}/api/vehicles
 Accept: application/json
+
+###
+
+POST {{CarDealerManager_HostAddress}}/api/vehicles
+Content-Type: application/json
+
+{
+  "brand": "BMW",
+  "model": "320d",
+  "year": 2021,
+  "analysisPurchasePrice": 10000,
+  "bidIncrement": 1,
+  "expectedSalePrice": 16000,
+  "conservativeSalePrice": 14500,
+  "minimumProfitAmount": 2500,
+  "minimumRoiPercentage": 20
+}
 
 ###

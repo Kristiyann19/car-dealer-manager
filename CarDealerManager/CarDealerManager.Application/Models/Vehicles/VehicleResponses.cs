@@ -1,0 +1,71 @@
+using CarDealerManager.Domain.Enums;
+using CarDealerManager.Domain.Financial;
+
+namespace CarDealerManager.Application.Models.Vehicles;
+
+public sealed record VehicleListItemResponse(
+    int Id,
+    VehicleStatus Status,
+    string Brand,
+    string Model,
+    int Year,
+    string? Vin,
+    decimal? CurrentBid,
+    decimal? MyBid,
+    decimal? AnalysisPurchasePrice,
+    decimal? ExpectedSalePrice,
+    decimal? ConservativeSalePrice,
+    DateTimeOffset? ArchivedAtUtc);
+
+public sealed record VehicleCostEntryResponse(
+    int Id,
+    VehicleCostKind Kind,
+    VehicleCostCategory Category,
+    string Description,
+    decimal Amount,
+    decimal? PurchasePricePercentage,
+    decimal? TaxPercentage,
+    decimal? RiskPercentage,
+    DateOnly? EntryDate,
+    int? RelatedEstimateId,
+    bool IncludedInAnalysis,
+    string? Notes,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    DateTimeOffset? ArchivedAtUtc);
+
+public sealed record VehicleDetailResponse(
+    int Id,
+    VehicleStatus Status,
+    string Brand,
+    string Model,
+    int Year,
+    string? Vin,
+    int? Mileage,
+    string? Engine,
+    FuelType? FuelType,
+    TransmissionType? TransmissionType,
+    string? SourcePlatform,
+    string? SourceUrl,
+    string? SourceCountry,
+    string? PhysicalLocation,
+    decimal? CurrentBid,
+    decimal? MyBid,
+    decimal? AnalysisPurchasePrice,
+    decimal BidIncrement,
+    decimal? FinalPurchasePrice,
+    DateOnly? PurchaseDate,
+    decimal? ExpectedSalePrice,
+    decimal? ConservativeSalePrice,
+    decimal? PlannedListingPrice,
+    decimal? MinimumAcceptableSalePrice,
+    decimal? ActualSalePrice,
+    DateOnly? ListingDate,
+    DateOnly? SaleDate,
+    decimal? MinimumProfitAmount,
+    decimal? MinimumRoiPercentage,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc,
+    DateTimeOffset? ArchivedAtUtc,
+    IReadOnlyList<VehicleCostEntryResponse> CostEntries,
+    FinancialCalculationResult FinancialAnalysis);

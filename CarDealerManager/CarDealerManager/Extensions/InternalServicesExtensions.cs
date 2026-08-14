@@ -1,9 +1,9 @@
 ﻿using CarDealerManager.Application.IRepository;
 using CarDealerManager.Application.IService;
-using CarDealerManager.Common.AppSettings;
-using CarDealerManager.Domain;
+using CarDealerManager.Application.Services;
+using CarDealerManager.Domain.Financial;
+using CarDealerManager.Infrastructure.Persistence;
 using CarDealerManager.Infrastructure.Repository;
-using CarDealerManager.Infrastructure.Service.CarDealerManager.Infrastructure.Service;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarDealerManager.WebAPI.Extensions
@@ -12,29 +12,25 @@ namespace CarDealerManager.WebAPI.Extensions
     {
         public static void ConfigureDbContextService(this IServiceCollection services)
         {
-            services
-                .AddDbContext<CdmDbContext>(o =>
-                {
-                    o.UseNpgsql(AppSettingsProvider.MainDbConnectionString,
-                        e => e.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
-                });
+            services.AddDbContext<CdmDbContext>((serviceProvider, options) =>
+            {
+                var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+                var connectionString = configuration.GetConnectionString("MainDatabase")
+                    ?? throw new InvalidOperationException(
+                        "Connection string 'MainDatabase' is not configured.");
+
+                options.UseNpgsql(
+                    connectionString,
+                    npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+            });
         }
 
-        public static void ConfigureRepositories(this IServiceCollection services)
+        public static void ConfigureApplicationServices(this IServiceCollection services)
         {
-            services
-                .AddScoped<IUnitOfWork, UnitOfWork>()
-                .AddScoped<ICarRepository, CarRepository>();
-
+            services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<VehicleFinancialCalculator>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IVehicleService, VehicleService>();
         }
-
-        public static void ConfigureServices(this IServiceCollection services)
-        {
-            services.AddHttpClient();
-            services.AddHttpContextAccessor();
-
-            services.AddScoped<ICarService, CarService>();
-        }
-
-     }
+    }
 }

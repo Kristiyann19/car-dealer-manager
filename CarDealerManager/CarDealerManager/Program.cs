@@ -1,15 +1,17 @@
-using CarDealerManager.Common.AppSettings;
 using CarDealerManager.WebAPI.Extensions;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
-AppSettingsProvider.AddAppSettings(builder.Configuration);
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.ConfigureDbContextService();
-builder.Services.ConfigureRepositories();
-builder.Services.ConfigureServices();
+builder.Services.ConfigureApplicationServices();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -20,7 +22,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseExceptionHandler();
 
 app.UseAuthorization();
 

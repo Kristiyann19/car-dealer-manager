@@ -4,7 +4,6 @@ WORKDIR /src
 
 COPY ["CarDealerManager/CarDealerManager.WebAPI.csproj", "CarDealerManager/"]
 COPY ["CarDealerManager.Application/CarDealerManager.Application.csproj", "CarDealerManager.Application/"]
-COPY ["CarDealerManager.Common/CarDealerManager.Common.csproj", "CarDealerManager.Common/"]
 COPY ["CarDealerManager.Domain/CarDealerManager.Domain.csproj", "CarDealerManager.Domain/"]
 COPY ["CarDealerManager.Infrastructure/CarDealerManager.Infrastructure.csproj", "CarDealerManager.Infrastructure/"]
 
