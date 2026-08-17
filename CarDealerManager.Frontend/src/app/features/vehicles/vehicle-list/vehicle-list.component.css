@@ -1,0 +1,51 @@
+.list-toolbar {
+  align-items: center;
+  color: #667b78;
+  display: flex;
+  font-size: 0.85rem;
+  justify-content: space-between;
+  margin: 0 0 0.75rem;
+}
+
+.vehicle-table-wrap {
+  background: #ffffff;
+  border: 1px solid #dce7e4;
+  border-radius: 14px;
+}
+
+.vehicle-table td:first-child {
+  min-width: 170px;
+}
+
+.vehicle-table .max-column {
+  background: #f1faf8;
+}
+
+.vehicle-table .max-value {
+  color: #126c5c;
+  font-weight: 750;
+}
+
+.vehicle-table small {
+  color: #728480;
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.archived-row {
+  opacity: 0.7;
+}
+
+.archived-badge {
+  color: #7c6b3c;
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.3rem;
+}
+
+.subtle-status {
+  color: #6d7f7c;
+  font-size: 0.72rem;
+  font-weight: 600;
+}

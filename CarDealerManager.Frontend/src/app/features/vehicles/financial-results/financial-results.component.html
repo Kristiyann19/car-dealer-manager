@@ -1,0 +1,228 @@
+<section class="financial-panel">
+  <div class="financial-heading">
+    <div>
+      <p class="eyebrow">Изчислено от системата</p>
+      <h2>Финансови резултати</h2>
+      <p>Всички стойности идват директно от последните изчисления на сървъра.</p>
+    </div>
+    <span class="currency-chip">{{ analysis.reportingCurrency }}</span>
+  </div>
+
+  <div class="scenario-summary">
+    <article class="scenario-card investment-card">
+      <span>Запазена цена за анализ</span>
+      <strong>{{
+        analysis.analysisPurchasePrice != null
+          ? (analysis.analysisPurchasePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+          : '—'
+      }}</strong>
+      <dl>
+        <div>
+          <dt>Прогнозни разходи с резерв</dt>
+          <dd>
+            {{
+              analysis.estimatedCostsAtAnalysisPrice
+                ? (analysis.estimatedCostsAtAnalysisPrice.riskAdjustedTotal
+                  | currency: 'EUR' : 'symbol' : '1.0-2')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Обща прогнозна инвестиция</dt>
+          <dd>
+            {{
+              analysis.expectedScenario.totalEstimatedInvestment != null
+                ? (analysis.expectedScenario.totalEstimatedInvestment
+                  | currency: 'EUR' : 'symbol' : '1.0-2')
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="scenario-card">
+      <span>Очакван сценарий</span>
+      <strong>{{
+        analysis.expectedScenario.profit != null
+          ? (analysis.expectedScenario.profit | currency: 'EUR' : 'symbol' : '1.0-2')
+          : '—'
+      }}</strong>
+      <small>Очаквана печалба</small>
+      <dl>
+        <div>
+          <dt>Продажна цена</dt>
+          <dd>
+            {{
+              analysis.expectedScenario.salePrice != null
+                ? (analysis.expectedScenario.salePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>ROI</dt>
+          <dd>
+            {{
+              analysis.expectedScenario.roiPercentage != null
+                ? (analysis.expectedScenario.roiPercentage | number: '1.2-4') + '%'
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Марж</dt>
+          <dd>
+            {{
+              analysis.expectedScenario.marginPercentage != null
+                ? (analysis.expectedScenario.marginPercentage | number: '1.2-4') + '%'
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="scenario-card conservative-card">
+      <span>Консервативен сценарий</span>
+      <strong>{{
+        analysis.conservativeScenario.profit != null
+          ? (analysis.conservativeScenario.profit | currency: 'EUR' : 'symbol' : '1.0-2')
+          : '—'
+      }}</strong>
+      <small>Консервативна печалба</small>
+      <dl>
+        <div>
+          <dt>Продажна цена</dt>
+          <dd>
+            {{
+              analysis.conservativeScenario.salePrice != null
+                ? (analysis.conservativeScenario.salePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>ROI</dt>
+          <dd>
+            {{
+              analysis.conservativeScenario.roiPercentage != null
+                ? (analysis.conservativeScenario.roiPercentage | number: '1.2-4') + '%'
+                : '—'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Марж</dt>
+          <dd>
+            {{
+              analysis.conservativeScenario.marginPercentage != null
+                ? (analysis.conservativeScenario.marginPercentage | number: '1.2-4') + '%'
+                : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+    </article>
+  </div>
+
+  <div class="max-bid-section">
+    <div class="subsection-heading">
+      <h3>Лимити за покупка</h3>
+      <p>Показани са и двата резултата, без единият да се приема автоматично за водещ.</p>
+    </div>
+    <div class="max-bid-layout">
+      <app-max-bid-card title="Очакван" [calculation]="analysis.expectedMaxBid" />
+      <app-max-bid-card title="Консервативен" [calculation]="analysis.conservativeMaxBid" />
+    </div>
+  </div>
+
+  @if (analysis.estimatedCostsAtAnalysisPrice) {
+    <details class="calculation-details">
+      <summary>Разбивка на разходите при цената за анализ</summary>
+      <div class="breakdown-totals">
+        <span
+          >Преди данък
+          <strong>{{
+            analysis.estimatedCostsAtAnalysisPrice.preTaxTotal
+              | currency: 'EUR' : 'symbol' : '1.0-2'
+          }}</strong></span
+        >
+        <span
+          >Данък / ДДС
+          <strong>{{
+            analysis.estimatedCostsAtAnalysisPrice.taxTotal | currency: 'EUR' : 'symbol' : '1.0-2'
+          }}</strong></span
+        >
+        <span
+          >Прогнозни разходи
+          <strong>{{
+            analysis.estimatedCostsAtAnalysisPrice.rawEstimatedTotal
+              | currency: 'EUR' : 'symbol' : '1.0-2'
+          }}</strong></span
+        >
+        <span
+          >Резерв
+          <strong>{{
+            analysis.estimatedCostsAtAnalysisPrice.riskContingencyTotal
+              | currency: 'EUR' : 'symbol' : '1.0-2'
+          }}</strong></span
+        >
+        <span
+          >С резерв
+          <strong>{{
+            analysis.estimatedCostsAtAnalysisPrice.riskAdjustedTotal
+              | currency: 'EUR' : 'symbol' : '1.0-2'
+          }}</strong></span
+        >
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Разход</th>
+              <th class="numeric">Фиксирана сума</th>
+              <th class="numeric">% от покупната цена</th>
+              <th class="numeric">Преди данък</th>
+              <th class="numeric">Данък / ДДС</th>
+              <th class="numeric">Резерв</th>
+              <th class="numeric">Разход с резерв</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              entry of analysis.estimatedCostsAtAnalysisPrice.entries;
+              track entry.costEntryId
+            ) {
+              <tr>
+                <td>
+                  <strong>{{ entry.description }}</strong
+                  ><small>{{ entry.category | uiLabel: 'costCategory' }}</small>
+                </td>
+                <td class="numeric">
+                  {{ entry.fixedAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">{{ entry.purchasePricePercentage | number: '1.0-4' }}%</td>
+                <td class="numeric">
+                  {{ entry.preTaxAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  {{ entry.taxAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  {{ entry.riskAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  <strong>{{
+                    entry.riskAdjustedAmount | currency: 'EUR' : 'symbol' : '1.0-2'
+                  }}</strong>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  }
+</section>

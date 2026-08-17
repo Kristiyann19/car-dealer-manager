@@ -1,0 +1,232 @@
+<form class="stack" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <section class="form-section">
+    <div class="section-heading">
+      <span class="section-number">A</span>
+      <div>
+        <h2>Автомобил</h2>
+        <p>Основните данни, налични при оценката.</p>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-4">
+      @if (allowStatusChange) {
+        <label>
+          <span>Статус</span>
+          <select formControlName="status">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status | uiLabel: 'vehicleStatus' }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label>
+        <span>Марка <b>*</b></span>
+        <input formControlName="brand" autocomplete="organization-title" placeholder="Peugeot" />
+        @if (isInvalid('brand')) {
+          <small class="field-error">Марката е задължителна.</small>
+        }
+      </label>
+
+      <label>
+        <span>Модел <b>*</b></span>
+        <input formControlName="model" placeholder="3008" />
+        @if (isInvalid('model')) {
+          <small class="field-error">Моделът е задължителен.</small>
+        }
+      </label>
+
+      <label>
+        <span>Година <b>*</b></span>
+        <input type="number" formControlName="year" min="1886" max="2200" />
+        @if (isInvalid('year')) {
+          <small class="field-error">Въведете година между 1886 и 2200.</small>
+        }
+      </label>
+
+      <label>
+        <span>VIN</span>
+        <input formControlName="vin" maxlength="50" placeholder="Когато е наличен" />
+      </label>
+
+      <label>
+        <span>Пробег</span>
+        <div class="input-suffix">
+          <input type="number" formControlName="mileage" min="0" /><em>км</em>
+        </div>
+      </label>
+
+      <label>
+        <span>Двигател</span>
+        <input formControlName="engine" placeholder="1.5 BlueHDi" />
+      </label>
+
+      <label>
+        <span>Гориво</span>
+        <select formControlName="fuelType">
+          <option [ngValue]="null">Не е посочено</option>
+          @for (fuelType of fuelTypes; track fuelType) {
+            <option [value]="fuelType">{{ fuelType | uiLabel: 'fuelType' }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Скоростна кутия</span>
+        <select formControlName="transmissionType">
+          <option [ngValue]="null">Не е посочено</option>
+          @for (transmissionType of transmissionTypes; track transmissionType) {
+            <option [value]="transmissionType">
+              {{ transmissionType | uiLabel: 'transmissionType' }}
+            </option>
+          }
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="section-heading">
+      <span class="section-number">B</span>
+      <div>
+        <h2>Източник</h2>
+        <p>Къде е намерен автомобилът и къде се намира в момента.</p>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-4">
+      <label>
+        <span>Платформа</span>
+        <input formControlName="sourcePlatform" placeholder="Търг или платформа" />
+      </label>
+      <label class="span-2">
+        <span>Линк към обявата</span>
+        <input type="url" formControlName="sourceUrl" placeholder="https://…" />
+      </label>
+      <label>
+        <span>Държава</span>
+        <input formControlName="sourceCountry" placeholder="Италия" />
+      </label>
+      <label>
+        <span>Местоположение</span>
+        <input formControlName="physicalLocation" placeholder="Милано" />
+      </label>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="section-heading">
+      <span class="section-number">C</span>
+      <div>
+        <h2>Търг и анализ на покупката</h2>
+        <p>Запазеният сценарий „Какво ще стане, ако купя на тази цена?“.</p>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-4">
+      <label>
+        <span>Текуща оферта</span>
+        <div class="input-prefix">
+          <em>€</em><input type="number" formControlName="currentBid" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Моята оферта</span>
+        <div class="input-prefix">
+          <em>€</em><input type="number" formControlName="myBid" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Цена за анализ</span>
+        <div class="input-prefix">
+          <em>€</em
+          ><input type="number" formControlName="analysisPurchasePrice" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Стъпка на наддаване <b>*</b></span>
+        <div class="input-prefix">
+          <em>€</em><input type="number" formControlName="bidIncrement" min="0.01" step="0.01" />
+        </div>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="section-heading">
+      <span class="section-number">D</span>
+      <div>
+        <h2>Пазарни стойности</h2>
+        <p>Очаквана и консервативна стойност при продажба.</p>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-4">
+      <label>
+        <span>Очаквана продажна цена</span>
+        <div class="input-prefix">
+          <em>€</em><input type="number" formControlName="expectedSalePrice" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Консервативна продажна цена</span>
+        <div class="input-prefix">
+          <em>€</em
+          ><input type="number" formControlName="conservativeSalePrice" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Цена на обявата</span>
+        <div class="input-prefix">
+          <em>€</em
+          ><input type="number" formControlName="plannedListingPrice" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Минимална продажна цена</span>
+        <div class="input-prefix">
+          <em>€</em
+          ><input type="number" formControlName="minimumAcceptableSalePrice" min="0" step="0.01" />
+        </div>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <div class="section-heading">
+      <span class="section-number">E</span>
+      <div>
+        <h2>Финансови цели</h2>
+        <p>Критериите, използвани за изчисляване на двата MAX BID лимита.</p>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid-4">
+      <label>
+        <span>Минимална печалба</span>
+        <div class="input-prefix">
+          <em>€</em
+          ><input type="number" formControlName="minimumProfitAmount" min="0" step="0.01" />
+        </div>
+      </label>
+      <label>
+        <span>Минимален ROI</span>
+        <div class="input-suffix">
+          <input type="number" formControlName="minimumRoiPercentage" min="0" step="0.01" /><em
+            >%</em
+          >
+        </div>
+        <small class="field-hint">Въведете 20 за 20%.</small>
+      </label>
+    </div>
+  </section>
+
+  @if (!readOnly) {
+    <div class="form-actions">
+      <button class="button button-primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Запазване…' : submitLabel }}
+      </button>
+      <span class="field-hint">Финансовите резултати се обновяват от сървъра след запазване.</span>
+    </div>
+  }
+</form>

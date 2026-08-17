@@ -1,0 +1,114 @@
+<article class="max-bid-card" [class.not-viable]="calculation.status === 'NotFinanciallyViable'">
+  <div class="max-bid-heading">
+    <div>
+      <p>{{ title }}</p>
+      <h3>MAX BID</h3>
+    </div>
+    <span [class]="statusClass">{{ calculation.status | uiLabel: 'maxBidStatus' }}</span>
+  </div>
+
+  @if (calculation.status === 'Calculated' && calculation.finalMaxBid != null) {
+    <div class="final-bid">
+      <span>Краен MAX BID</span>
+      <strong>{{ calculation.finalMaxBid | currency: 'EUR' : 'symbol' : '1.0-2' }}</strong>
+      <small
+        >Закръглен надолу до стъпка
+        {{ calculation.bidIncrement | currency: 'EUR' : 'symbol' : '1.0-2' }}</small
+      >
+    </div>
+
+    <dl class="max-bid-grid">
+      <div>
+        <dt>MAX BID според минимална печалба</dt>
+        <dd>{{ calculation.maxBidByMinimumProfit | currency: 'EUR' : 'symbol' : '1.0-2' }}</dd>
+      </div>
+      <div>
+        <dt>MAX BID според минимален ROI</dt>
+        <dd>{{ calculation.maxBidByMinimumRoi | currency: 'EUR' : 'symbol' : '1.0-2' }}</dd>
+      </div>
+      <div>
+        <dt>Математически лимит</dt>
+        <dd>{{ calculation.mathematicalMaxBid | currency: 'EUR' : 'symbol' : '1.0-2' }}</dd>
+      </div>
+      <div>
+        <dt>Ограничаващ критерий</dt>
+        <dd>{{ calculation.bindingConstraint | uiLabel: 'bindingConstraint' }}</dd>
+      </div>
+    </dl>
+  } @else {
+    <div class="max-bid-message">
+      <strong>{{
+        calculation.status === 'NotFinanciallyViable'
+          ? 'Няма изгодна покупна цена'
+          : 'Необходими са още данни'
+      }}</strong>
+      <p>
+        {{
+          (calculation.reason | uiMessage) ||
+            'Попълнете продажните цени и финансовите цели, за да изчислите MAX BID.'
+        }}
+      </p>
+    </div>
+  }
+
+  @if (calculation.estimatedCostsAtFinalBid) {
+    <details class="inline-details">
+      <summary>Проверка и разходи при крайния MAX BID</summary>
+      <dl class="verification-grid">
+        <div>
+          <dt>Обща инвестиция</dt>
+          <dd>
+            {{ calculation.totalInvestmentAtFinalBid | currency: 'EUR' : 'symbol' : '1.0-2' }}
+          </dd>
+        </div>
+        <div>
+          <dt>Печалба</dt>
+          <dd>{{ calculation.profitAtFinalBid | currency: 'EUR' : 'symbol' : '1.0-2' }}</dd>
+        </div>
+        <div>
+          <dt>ROI</dt>
+          <dd>{{ calculation.roiPercentageAtFinalBid | number: '1.2-4' }}%</dd>
+        </div>
+        <div>
+          <dt>Марж</dt>
+          <dd>{{ calculation.marginPercentageAtFinalBid | number: '1.2-4' }}%</dd>
+        </div>
+      </dl>
+
+      <div class="table-wrap compact-table-wrap">
+        <table class="data-table compact-table">
+          <thead>
+            <tr>
+              <th>Разход</th>
+              <th class="numeric">Преди данък</th>
+              <th class="numeric">Данък / ДДС</th>
+              <th class="numeric">Резерв</th>
+              <th class="numeric">С резерв</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of calculation.estimatedCostsAtFinalBid.entries; track entry.costEntryId) {
+              <tr>
+                <td>{{ entry.description }}</td>
+                <td class="numeric">
+                  {{ entry.preTaxAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  {{ entry.taxAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  {{ entry.riskAmount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </td>
+                <td class="numeric">
+                  <strong>{{
+                    entry.riskAdjustedAmount | currency: 'EUR' : 'symbol' : '1.0-2'
+                  }}</strong>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  }
+</article>

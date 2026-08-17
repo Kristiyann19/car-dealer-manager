@@ -1,0 +1,18 @@
+<header class="app-header">
+  <a class="brand" routerLink="/vehicles" aria-label="Начало на управлението на автокъщата">
+    <span class="brand-mark">АВ</span>
+    <span>
+      <strong>Управление на автокъща</strong>
+      <small>Оценка на автомобили</small>
+    </span>
+  </a>
+
+  <nav aria-label="Основна навигация">
+    <a routerLink="/vehicles" routerLinkActive="active">Автомобили</a>
+    <a class="button button-primary button-small" routerLink="/vehicles/new">Добави автомобил</a>
+  </nav>
+</header>
+
+<main class="app-shell">
+  <router-outlet />
+</main>

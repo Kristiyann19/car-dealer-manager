@@ -1,0 +1,17 @@
+<div class="page-heading">
+  <div>
+    <a class="back-link" routerLink="/vehicles">← Автомобили</a>
+    <p class="eyebrow">Нова оценка</p>
+    <h1>Добави автомобил</h1>
+    <p>
+      Създайте автомобила преди наддаването или покупката. Задължителни са само марка, модел, година
+      и стъпка на наддаване.
+    </p>
+  </div>
+</div>
+
+@if (error) {
+  <div class="alert alert-error" role="alert">{{ error }}</div>
+}
+
+<app-vehicle-form [saving]="saving" submitLabel="Създай автомобил" (submitted)="create($event)" />

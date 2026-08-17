@@ -1,0 +1,285 @@
+.detail-heading {
+  align-items: flex-end;
+}
+
+.title-line {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.title-line h1 {
+  margin-right: 0.25rem;
+}
+
+.archived-badge {
+  background: #f3ead2;
+  border-radius: 999px;
+  color: #795e1f;
+  font-size: 0.7rem;
+  font-weight: 750;
+  padding: 0.35rem 0.6rem;
+}
+
+.heading-stat {
+  text-align: right;
+}
+
+.heading-stat span,
+.heading-stat strong {
+  display: block;
+}
+
+.heading-stat span {
+  color: #71837f;
+  font-size: 0.72rem;
+}
+
+.heading-stat strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  margin-top: 0.15rem;
+}
+
+.evaluation-details {
+  margin-bottom: 1rem;
+}
+
+.evaluation-details > summary {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dce7e4;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  padding: 1rem 1.2rem;
+}
+
+.evaluation-details[open] > summary {
+  border-radius: 12px 12px 0 0;
+}
+
+.evaluation-details > summary span {
+  font-weight: 750;
+}
+
+.evaluation-details > summary small {
+  color: #748783;
+}
+
+.evaluation-form-wrap {
+  background: #f0f5f4;
+  border: 1px solid #dce7e4;
+  border-radius: 0 0 12px 12px;
+  border-top: 0;
+  padding: 1rem;
+}
+
+.detail-section {
+  background: #ffffff;
+  border: 1px solid #dce7e4;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.section-bar,
+.cost-form-heading {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.section-bar {
+  margin-bottom: 1rem;
+}
+
+.section-bar h2,
+.section-bar p,
+.cost-form-heading h3,
+.cost-form-heading p {
+  margin: 0;
+}
+
+.section-bar h2 {
+  font-size: 1.2rem;
+  margin: 0.08rem 0 0.2rem;
+}
+
+.section-bar p:last-child,
+.cost-form-heading p {
+  color: #71837f;
+  font-size: 0.8rem;
+}
+
+.cost-form {
+  background: #f4f8f7;
+  border: 1px solid #d7e4e1;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  padding: 1.1rem;
+}
+
+.cost-form-heading {
+  margin-bottom: 1rem;
+}
+
+.cost-form-heading h3 {
+  font-size: 1rem;
+}
+
+.checkbox-card {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cfddda;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: row;
+  gap: 0.65rem;
+  min-height: 42px;
+  padding: 0 0.75rem;
+}
+
+.checkbox-card input {
+  width: auto;
+}
+
+.checkbox-card strong,
+.checkbox-card small {
+  display: block;
+}
+
+.checkbox-card strong {
+  color: #263c38;
+  font-size: 0.76rem;
+}
+
+.checkbox-card small {
+  color: #778783;
+  font-size: 0.67rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.cost-table small {
+  color: #758783;
+  display: block;
+  font-size: 0.69rem;
+  margin-top: 0.15rem;
+}
+
+.highlighted-column {
+  background: #f1faf8;
+}
+
+.excluded-row {
+  color: #84938f;
+}
+
+.muted {
+  color: #85938f;
+  font-size: 0.72rem;
+}
+
+.row-actions {
+  white-space: nowrap;
+}
+
+.row-actions button + button {
+  margin-left: 0.55rem;
+}
+
+.switch {
+  display: inline-flex;
+}
+
+.switch input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.switch span {
+  background: #b7c5c2;
+  border-radius: 999px;
+  cursor: pointer;
+  display: block;
+  height: 21px;
+  position: relative;
+  transition: background 0.15s ease;
+  width: 38px;
+}
+
+.switch span::after {
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  content: '';
+  height: 17px;
+  left: 2px;
+  position: absolute;
+  top: 2px;
+  transition: transform 0.15s ease;
+  width: 17px;
+}
+
+.switch input:checked + span {
+  background: #269b87;
+}
+
+.switch input:checked + span::after {
+  transform: translateX(17px);
+}
+
+.switch input:disabled + span {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.archived-costs {
+  border-top: 1px solid #e0e9e7;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+}
+
+.archived-costs summary {
+  color: #6f807d;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.archived-costs ul {
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+}
+
+.archived-costs li {
+  border-top: 1px solid #edf2f1;
+  color: #768682;
+  display: flex;
+  font-size: 0.75rem;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+}
+
+@media (max-width: 700px) {
+  .detail-heading,
+  .section-bar {
+    align-items: flex-start;
+  }
+
+  .heading-stat {
+    text-align: left;
+  }
+}

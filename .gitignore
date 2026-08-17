@@ -5,6 +5,9 @@
 **/bin
 **/obj
 **/Log
+**/node_modules
+**/.angular
+**/dist
 
 *.tmp
 *.suo

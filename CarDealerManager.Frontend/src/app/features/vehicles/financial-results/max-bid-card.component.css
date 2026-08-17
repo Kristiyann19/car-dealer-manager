@@ -1,0 +1,154 @@
+.max-bid-card {
+  background: #102d32;
+  border: 1px solid #2d5558;
+  border-radius: 16px;
+  color: #edf8f6;
+  overflow: hidden;
+  padding: 1.35rem;
+}
+
+.max-bid-card.not-viable {
+  background: #3c2425;
+  border-color: #754244;
+}
+
+.max-bid-heading {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.max-bid-heading p,
+.max-bid-heading h3 {
+  margin: 0;
+}
+
+.max-bid-heading p {
+  color: #a8c7c2;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.max-bid-heading h3 {
+  font-size: 1rem;
+  margin-top: 0.2rem;
+}
+
+.max-bid-status {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: #d5e6e3;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.35rem 0.55rem;
+}
+
+.status-calculated {
+  background: rgba(97, 208, 189, 0.18);
+  color: #82e4d3;
+}
+
+.status-notfinanciallyviable {
+  background: rgba(255, 168, 168, 0.14);
+  color: #ffc0c0;
+}
+
+.final-bid {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  margin: 1.35rem 0 1rem;
+  padding-bottom: 1.15rem;
+}
+
+.final-bid span,
+.final-bid small {
+  color: #a8c7c2;
+  font-size: 0.72rem;
+}
+
+.final-bid strong {
+  color: #76dfcd;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  margin: 0.2rem 0;
+}
+
+.max-bid-grid,
+.verification-grid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+dt {
+  color: #9eb9b5;
+  font-size: 0.7rem;
+}
+
+dd {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0.2rem 0 0;
+}
+
+.max-bid-message {
+  margin: 2rem 0;
+}
+
+.max-bid-message strong {
+  font-size: 1.25rem;
+}
+
+.max-bid-message p {
+  color: #d8c4c4;
+  font-size: 0.82rem;
+  margin-bottom: 0;
+}
+
+.inline-details {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+}
+
+.inline-details summary {
+  color: #bcd1ce;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.verification-grid {
+  margin: 1rem 0;
+}
+
+.compact-table-wrap {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.compact-table {
+  color: #e7f1ef;
+  font-size: 0.72rem;
+}
+
+.compact-table th,
+.compact-table td {
+  border-color: rgba(255, 255, 255, 0.1);
+  padding: 0.55rem;
+}
+
+.compact-table th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #a8c7c2;
+}
+
+@media (max-width: 620px) {
+  .max-bid-grid,
+  .verification-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,90 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-header {
+  align-items: center;
+  background: #102128;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 3.5vw;
+}
+
+.brand {
+  align-items: center;
+  color: #f6fbfa;
+  display: flex;
+  gap: 0.8rem;
+  text-decoration: none;
+}
+
+.brand-mark {
+  align-items: center;
+  background: #61d0bd;
+  border-radius: 10px;
+  color: #102128;
+  display: inline-flex;
+  font-weight: 800;
+  height: 38px;
+  justify-content: center;
+  letter-spacing: -0.04em;
+  width: 38px;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.brand small {
+  color: #a8bfbb;
+  font-size: 0.72rem;
+  margin-top: 0.08rem;
+}
+
+nav {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+}
+
+nav > a:not(.button) {
+  color: #c6d7d4;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+nav > a.active:not(.button),
+nav > a:hover:not(.button) {
+  color: #ffffff;
+}
+
+.app-shell {
+  margin: 0 auto;
+  max-width: 1520px;
+  padding: 2.2rem 3.5vw 4rem;
+}
+
+@media (max-width: 700px) {
+  .app-header {
+    padding: 0 1rem;
+  }
+
+  .brand small,
+  nav > a:not(.button) {
+    display: none;
+  }
+
+  .app-shell {
+    padding: 1.5rem 1rem 3rem;
+  }
+}
