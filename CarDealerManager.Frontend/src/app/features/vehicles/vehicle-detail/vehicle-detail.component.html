@@ -1,274 +1,297 @@
-@if (loading) {
-  <div class="empty-state">
-    <span class="spinner"></span>
-    <p>Зареждане на оценката…</p>
-  </div>
-} @else if (vehicle) {
-  <div class="page-heading page-heading-row detail-heading">
-    <div>
-      <a class="back-link" routerLink="/vehicles">← Автомобили</a>
-      <div class="title-line">
-        <h1>{{ vehicle.brand }} {{ vehicle.model }}</h1>
-        <span class="status-badge">{{ vehicle.status | uiLabel: 'vehicleStatus' }}</span>
-        @if (vehicle.archivedAtUtc) {
-          <span class="archived-badge">Архивиран</span>
-        }
-      </div>
-      <p>
-        {{ vehicle.year }}
-        @if (vehicle.sourceCountry) {
-          · {{ vehicle.sourceCountry }}
-        }
-        @if (vehicle.physicalLocation) {
-          · {{ vehicle.physicalLocation }}
-        }
-      </p>
-    </div>
-    <div class="heading-stat">
-      <span>Сценарий за анализ</span>
-      <strong>{{
-        vehicle.analysisPurchasePrice != null
-          ? (vehicle.analysisPurchasePrice | currency: 'EUR' : 'symbol' : '1.0-2')
-          : 'Не е зададена'
-      }}</strong>
-    </div>
-  </div>
-
-  @if (vehicle.archivedAtUtc) {
-    <div class="alert alert-warning">
-      Този автомобил е архивиран. Запазената оценка е достъпна само за преглед.
+@switch (pageState().status) {
+  @case ('loading') {
+    <div class="empty-state">
+      <span class="spinner"></span>
+      <p>Зареждане на оценката…</p>
     </div>
   }
-
-  @if (error) {
-    <div class="alert alert-error" role="alert">{{ error }}</div>
-  }
-
-  <details class="evaluation-details" [open]="!vehicle.archivedAtUtc">
-    <summary>
-      <span>Автомобил и допускания</span>
-      <small>{{
-        vehicle.archivedAtUtc ? 'Преглед на запазените данни' : 'Редактиране на данните'
-      }}</small>
-    </summary>
-    <div class="evaluation-form-wrap">
-      <app-vehicle-form
-        [vehicle]="vehicle"
-        [saving]="savingVehicle"
-        [readOnly]="vehicle.archivedAtUtc !== null"
-        [allowStatusChange]="true"
-        submitLabel="Запази и преизчисли"
-        (submitted)="saveVehicle($event)"
-      />
-    </div>
-  </details>
-
-  <section class="detail-section costs-section">
-    <div class="section-bar">
-      <div>
-        <p class="eyebrow">Входни данни</p>
-        <h2>Прогнозни разходи</h2>
-        <p>В сметката участват само активните разходи, отбелязани като включени.</p>
+  @case ('error') {
+    @if (pageError(); as error) {
+      <div class="empty-state" role="alert">
+        <h1>{{ error.notFound ? 'Автомобилът не е намерен' : 'Възникна грешка' }}</h1>
+        <p>{{ error.message }}</p>
+        <a class="button button-primary" routerLink="/vehicles">Към автомобилите</a>
       </div>
-      @if (canEdit && !showCostForm) {
-        <button class="button button-secondary" type="button" (click)="startAddCost()">
-          Добави разход
-        </button>
-      }
-    </div>
-
-    @if (costError && !showCostForm) {
-      <div class="alert alert-error" role="alert">{{ costError }}</div>
     }
-
-    @if (showCostForm) {
-      <form class="cost-form" [formGroup]="costForm" (ngSubmit)="saveCost()" novalidate>
-        <div class="cost-form-heading">
-          <div>
-            <h3>{{ editingCostId ? 'Редактирай разход' : 'Добави разход' }}</h3>
-            <p>Фиксираната сума и процентът от покупната цена могат да се комбинират.</p>
-          </div>
-          <button
-            class="icon-button"
-            type="button"
-            aria-label="Затвори формата за разход"
-            (click)="cancelCostEdit()"
-          >
-            ×
-          </button>
-        </div>
-
-        @if (costError) {
-          <div class="alert alert-error" role="alert">{{ costError }}</div>
-        }
-
-        <div class="form-grid form-grid-4">
-          <label>
-            <span>Категория <b>*</b></span>
-            <select formControlName="category">
-              @for (category of categories; track category) {
-                <option [value]="category">{{ category | uiLabel: 'costCategory' }}</option>
-              }
-            </select>
-          </label>
-          <label class="span-2">
-            <span>Описание <b>*</b></span>
-            <input formControlName="description" placeholder="Транспорт от Италия до България" />
-          </label>
-          <label>
-            <span>Дата</span>
-            <input type="date" formControlName="entryDate" />
-          </label>
-          <label>
-            <span>Фиксирана сума</span>
-            <div class="input-prefix">
-              <em>€</em><input type="number" formControlName="amount" min="0" step="0.01" />
-            </div>
-          </label>
-          <label>
-            <span>% от покупната цена</span>
-            <div class="input-suffix">
-              <input
-                type="number"
-                formControlName="purchasePricePercentage"
-                min="0"
-                step="0.01"
-              /><em>%</em>
-            </div>
-          </label>
-          <label>
-            <span>Данък / ДДС %</span>
-            <div class="input-suffix">
-              <input type="number" formControlName="taxPercentage" min="0" step="0.01" /><em>%</em>
-            </div>
-          </label>
-          <label>
-            <span>Резерв %</span>
-            <div class="input-suffix">
-              <input type="number" formControlName="riskPercentage" min="0" step="0.01" /><em>%</em>
-            </div>
-          </label>
-          <label class="span-3">
-            <span>Бележки</span>
-            <input formControlName="notes" placeholder="Незадължителна вътрешна информация" />
-          </label>
-          <label class="checkbox-card">
-            <input type="checkbox" formControlName="includedInAnalysis" />
-            <span
-              ><strong>Включен в сметката</strong
-              ><small>Използвай този разход в текущите изчисления</small></span
-            >
-          </label>
-        </div>
-
-        <div class="form-actions">
-          <button class="button button-ghost" type="button" (click)="cancelCostEdit()">
-            Отказ
-          </button>
-          <button class="button button-primary" type="submit" [disabled]="savingCost">
-            {{ savingCost ? 'Запазване…' : editingCostId ? 'Запази разхода' : 'Добави разход' }}
-          </button>
-        </div>
-      </form>
-    }
-
-    @if (activeEstimatedCosts.length === 0) {
-      <div class="mini-empty"><p>Няма добавени активни прогнозни разходи.</p></div>
-    } @else {
-      <div class="table-wrap">
-        <table class="data-table cost-table">
-          <thead>
-            <tr>
-              <th>Разход</th>
-              <th class="numeric">Фиксирана сума</th>
-              <th class="numeric">% от покупната цена</th>
-              <th class="numeric">Данък / ДДС %</th>
-              <th class="numeric">Резерв %</th>
-              <th>Включен в сметката</th>
-              <th class="numeric highlighted-column">Разход с резерв</th>
-              @if (canEdit) {
-                <th></th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (cost of activeEstimatedCosts; track cost.id) {
-              <tr [class.excluded-row]="!cost.includedInAnalysis">
-                <td>
-                  <strong>{{ cost.description }}</strong
-                  ><small>{{ cost.category | uiLabel: 'costCategory' }}</small>
-                </td>
-                <td class="numeric">{{ cost.amount | currency: 'EUR' : 'symbol' : '1.0-2' }}</td>
-                <td class="numeric">{{ cost.purchasePricePercentage ?? 0 | number: '1.0-4' }}%</td>
-                <td class="numeric">{{ cost.taxPercentage ?? 0 | number: '1.0-4' }}%</td>
-                <td class="numeric">{{ cost.riskPercentage ?? 0 | number: '1.0-4' }}%</td>
-                <td>
-                  <label
-                    class="switch"
-                    [attr.aria-label]="'Включи „' + cost.description + '“ в сметката'"
-                  >
-                    <input
-                      type="checkbox"
-                      [checked]="cost.includedInAnalysis"
-                      [disabled]="!canEdit || savingCost"
-                      (change)="toggleIncluded(cost, $any($event.target).checked)"
-                    />
-                    <span></span>
-                  </label>
-                </td>
-                <td class="numeric highlighted-column">
-                  @if (breakdownFor(cost.id); as breakdown) {
-                    <strong>{{
-                      breakdown.riskAdjustedAmount | currency: 'EUR' : 'symbol' : '1.0-2'
-                    }}</strong>
-                  } @else {
-                    <span class="muted">Изключен</span>
-                  }
-                </td>
-                @if (canEdit) {
-                  <td class="row-actions">
-                    <button class="text-button" type="button" (click)="startEditCost(cost)">
-                      Редактирай
-                    </button>
-                    <button
-                      class="text-button danger-text"
-                      type="button"
-                      (click)="archiveCost(cost)"
-                    >
-                      Архивирай
-                    </button>
-                  </td>
-                }
-              </tr>
+  }
+  @case ('loaded') {
+    @if (vehicle(); as vehicle) {
+      <div class="page-heading page-heading-row detail-heading">
+        <div>
+          <a class="back-link" routerLink="/vehicles">← Автомобили</a>
+          <div class="title-line">
+            <h1>{{ vehicle.brand }} {{ vehicle.model }}</h1>
+            <span class="status-badge">{{ vehicle.status | uiLabel: 'vehicleStatus' }}</span>
+            @if (vehicle.archivedAtUtc) {
+              <span class="archived-badge">Архивиран</span>
             }
-          </tbody>
-        </table>
+          </div>
+          <p>
+            {{ vehicle.year }}
+            @if (vehicle.sourceCountry) {
+              · {{ vehicle.sourceCountry }}
+            }
+            @if (vehicle.physicalLocation) {
+              · {{ vehicle.physicalLocation }}
+            }
+          </p>
+        </div>
+        <div class="heading-stat">
+          <span>Сценарий за анализ</span>
+          <strong>{{
+            vehicle.analysisPurchasePrice != null
+              ? (vehicle.analysisPurchasePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+              : 'Не е зададена'
+          }}</strong>
+        </div>
       </div>
-    }
 
-    @if (archivedEstimatedCosts.length > 0) {
-      <details class="archived-costs">
+      @if (vehicle.archivedAtUtc) {
+        <div class="alert alert-warning">
+          Този автомобил е архивиран. Запазената оценка е достъпна само за преглед.
+        </div>
+      }
+
+      @if (actionError()) {
+        <div class="alert alert-error" role="alert">{{ actionError() }}</div>
+      }
+
+      <details class="evaluation-details" [open]="!vehicle.archivedAtUtc">
         <summary>
-          {{ archivedEstimatedCosts.length }}
-          {{ archivedEstimatedCosts.length === 1 ? 'архивиран разход' : 'архивирани разхода' }}
+          <span>Автомобил и допускания</span>
+          <small>{{
+            vehicle.archivedAtUtc ? 'Преглед на запазените данни' : 'Редактиране на данните'
+          }}</small>
         </summary>
-        <ul>
-          @for (cost of archivedEstimatedCosts; track cost.id) {
-            <li>
-              <span>{{ cost.description }} · {{ cost.category | uiLabel: 'costCategory' }}</span
-              ><strong>{{ cost.amount | currency: 'EUR' : 'symbol' : '1.0-2' }}</strong>
-            </li>
-          }
-        </ul>
+        <div class="evaluation-form-wrap">
+          <app-vehicle-form
+            [vehicle]="vehicle"
+            [saving]="savingVehicle()"
+            [readOnly]="vehicle.archivedAtUtc !== null"
+            [allowStatusChange]="true"
+            submitLabel="Запази и преизчисли"
+            (submitted)="saveVehicle($event)"
+          />
+        </div>
       </details>
-    }
-  </section>
 
-  <app-financial-results [analysis]="vehicle.financialAnalysis" />
-} @else {
-  <div class="empty-state">
-    <h1>Автомобилът не е намерен</h1>
-    <p>{{ error }}</p>
-    <a class="button button-primary" routerLink="/vehicles">Към автомобилите</a>
-  </div>
+      <section class="detail-section costs-section">
+        <div class="section-bar">
+          <div>
+            <p class="eyebrow">Входни данни</p>
+            <h2>Прогнозни разходи</h2>
+            <p>В сметката участват само активните разходи, отбелязани като включени.</p>
+          </div>
+          @if (canEdit() && !showCostForm()) {
+            <button class="button button-secondary" type="button" (click)="startAddCost()">
+              Добави разход
+            </button>
+          }
+        </div>
+
+        @if (costError() && !showCostForm()) {
+          <div class="alert alert-error" role="alert">{{ costError() }}</div>
+        }
+
+        @if (showCostForm()) {
+          <form class="cost-form" [formGroup]="costForm" (ngSubmit)="saveCost()" novalidate>
+            <div class="cost-form-heading">
+              <div>
+                <h3>{{ editingCostId() ? 'Редактирай разход' : 'Добави разход' }}</h3>
+                <p>Фиксираната сума и процентът от покупната цена могат да се комбинират.</p>
+              </div>
+              <button
+                class="icon-button"
+                type="button"
+                aria-label="Затвори формата за разход"
+                (click)="cancelCostEdit()"
+              >
+                ×
+              </button>
+            </div>
+
+            @if (costError()) {
+              <div class="alert alert-error" role="alert">{{ costError() }}</div>
+            }
+
+            <div class="form-grid form-grid-4">
+              <label>
+                <span>Категория <b>*</b></span>
+                <select formControlName="category">
+                  @for (category of categories; track category) {
+                    <option [value]="category">{{ category | uiLabel: 'costCategory' }}</option>
+                  }
+                </select>
+              </label>
+              <label class="span-2">
+                <span>Описание <b>*</b></span>
+                <input
+                  formControlName="description"
+                  placeholder="Транспорт от Италия до България"
+                />
+              </label>
+              <label>
+                <span>Дата</span>
+                <input type="date" formControlName="entryDate" />
+              </label>
+              <label>
+                <span>Фиксирана сума</span>
+                <div class="input-prefix">
+                  <em>€</em><input type="number" formControlName="amount" min="0" step="0.01" />
+                </div>
+              </label>
+              <label>
+                <span>% от покупната цена</span>
+                <div class="input-suffix">
+                  <input
+                    type="number"
+                    formControlName="purchasePricePercentage"
+                    min="0"
+                    step="0.01"
+                  /><em>%</em>
+                </div>
+              </label>
+              <label>
+                <span>Данък / ДДС %</span>
+                <div class="input-suffix">
+                  <input type="number" formControlName="taxPercentage" min="0" step="0.01" /><em
+                    >%</em
+                  >
+                </div>
+              </label>
+              <label>
+                <span>Резерв %</span>
+                <div class="input-suffix">
+                  <input type="number" formControlName="riskPercentage" min="0" step="0.01" /><em
+                    >%</em
+                  >
+                </div>
+              </label>
+              <label class="span-3">
+                <span>Бележки</span>
+                <input formControlName="notes" placeholder="Незадължителна вътрешна информация" />
+              </label>
+              <label class="checkbox-card">
+                <input type="checkbox" formControlName="includedInAnalysis" />
+                <span
+                  ><strong>Включен в сметката</strong
+                  ><small>Използвай този разход в текущите изчисления</small></span
+                >
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button class="button button-ghost" type="button" (click)="cancelCostEdit()">
+                Отказ
+              </button>
+              <button class="button button-primary" type="submit" [disabled]="savingCost()">
+                {{
+                  savingCost() ? 'Запазване…' : editingCostId() ? 'Запази разхода' : 'Добави разход'
+                }}
+              </button>
+            </div>
+          </form>
+        }
+
+        @if (activeEstimatedCosts().length === 0) {
+          <div class="mini-empty"><p>Няма добавени активни прогнозни разходи.</p></div>
+        } @else {
+          <div class="table-wrap">
+            <table class="data-table cost-table">
+              <thead>
+                <tr>
+                  <th>Разход</th>
+                  <th class="numeric">Фиксирана сума</th>
+                  <th class="numeric">% от покупната цена</th>
+                  <th class="numeric">Данък / ДДС %</th>
+                  <th class="numeric">Резерв %</th>
+                  <th>Включен в сметката</th>
+                  <th class="numeric highlighted-column">Разход с резерв</th>
+                  @if (canEdit()) {
+                    <th></th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (cost of activeEstimatedCosts(); track cost.id) {
+                  <tr [class.excluded-row]="!cost.includedInAnalysis">
+                    <td>
+                      <strong>{{ cost.description }}</strong
+                      ><small>{{ cost.category | uiLabel: 'costCategory' }}</small>
+                    </td>
+                    <td class="numeric">
+                      {{ cost.amount | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                    </td>
+                    <td class="numeric">
+                      {{ cost.purchasePricePercentage ?? 0 | number: '1.0-4' }}%
+                    </td>
+                    <td class="numeric">{{ cost.taxPercentage ?? 0 | number: '1.0-4' }}%</td>
+                    <td class="numeric">{{ cost.riskPercentage ?? 0 | number: '1.0-4' }}%</td>
+                    <td>
+                      <label
+                        class="switch"
+                        [attr.aria-label]="'Включи „' + cost.description + '“ в сметката'"
+                      >
+                        <input
+                          type="checkbox"
+                          [checked]="cost.includedInAnalysis"
+                          [disabled]="!canEdit() || savingCost()"
+                          (change)="toggleIncluded(cost, $any($event.target).checked)"
+                        />
+                        <span></span>
+                      </label>
+                    </td>
+                    <td class="numeric highlighted-column">
+                      @if (breakdownFor(cost.id); as breakdown) {
+                        <strong>{{
+                          breakdown.riskAdjustedAmount | currency: 'EUR' : 'symbol' : '1.0-2'
+                        }}</strong>
+                      } @else {
+                        <span class="muted">Изключен</span>
+                      }
+                    </td>
+                    @if (canEdit()) {
+                      <td class="row-actions">
+                        <button class="text-button" type="button" (click)="startEditCost(cost)">
+                          Редактирай
+                        </button>
+                        <button
+                          class="text-button danger-text"
+                          type="button"
+                          (click)="archiveCost(cost)"
+                        >
+                          Архивирай
+                        </button>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (archivedEstimatedCosts().length > 0) {
+          <details class="archived-costs">
+            <summary>
+              {{ archivedEstimatedCosts().length }}
+              {{
+                archivedEstimatedCosts().length === 1 ? 'архивиран разход' : 'архивирани разхода'
+              }}
+            </summary>
+            <ul>
+              @for (cost of archivedEstimatedCosts(); track cost.id) {
+                <li>
+                  <span>{{ cost.description }} · {{ cost.category | uiLabel: 'costCategory' }}</span
+                  ><strong>{{ cost.amount | currency: 'EUR' : 'symbol' : '1.0-2' }}</strong>
+                </li>
+              }
+            </ul>
+          </details>
+        }
+      </section>
+
+      <app-financial-results [analysis]="vehicle.financialAnalysis" />
+    }
+  }
 }

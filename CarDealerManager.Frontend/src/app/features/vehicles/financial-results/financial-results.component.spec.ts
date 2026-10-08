@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { FinancialCalculationResult, MaxBidCalculation } from '../../../core/models/vehicle.models';
+import { emptyFinancialAnalysis } from '../../../testing/vehicle-test-data';
 import { FinancialResultsComponent } from './financial-results.component';
 
 describe('FinancialResultsComponent', () => {
@@ -29,6 +30,41 @@ describe('FinancialResultsComponent', () => {
     expect(text).toContain('Минимален ROI');
     expect(text).not.toContain('Calculated');
     expect(text).not.toContain('MinimumRoi');
+  });
+
+  it('renders InsufficientData without assuming nullable financial values exist', async () => {
+    const fixture = TestBed.createComponent(FinancialResultsComponent);
+    fixture.componentRef.setInput('analysis', emptyFinancialAnalysis);
+    await fixture.whenStable();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Недостатъчно данни');
+    expect(text).toContain('Необходими са още данни');
+    expect(text).toContain('Необходима е положителна продажна цена.');
+  });
+
+  it('renders NotFinanciallyViable as a result instead of a valid zero MAX BID', async () => {
+    const notViable: MaxBidCalculation = {
+      ...emptyFinancialAnalysis.expectedMaxBid,
+      status: 'NotFinanciallyViable',
+      reason: 'No positive purchase price can satisfy the configured targets.',
+      salePrice: 1000,
+      minimumProfitAmount: 2500,
+      allConstraintsSatisfied: false,
+    };
+    const analysis: FinancialCalculationResult = {
+      ...emptyFinancialAnalysis,
+      expectedMaxBid: notViable,
+      conservativeMaxBid: notViable,
+    };
+    const fixture = TestBed.createComponent(FinancialResultsComponent);
+    fixture.componentRef.setInput('analysis', analysis);
+    await fixture.whenStable();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Сделката не е изгодна');
+    expect(text).toContain('Няма изгодна покупна цена');
+    expect(text).toContain('Няма положителна покупна цена, която да покрива зададените цели.');
   });
 });
 

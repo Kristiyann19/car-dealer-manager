@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { forkJoin, Observable, of, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import {
   EstimatedCostEntryUpsertRequest,
@@ -19,16 +19,6 @@ export class VehicleApiService {
     return this.http.get<VehicleListItem[]>(this.baseUrl, {
       params: { includeArchived },
     });
-  }
-
-  getVehicleCards(includeArchived = false): Observable<VehicleDetail[]> {
-    return this.getVehicles(includeArchived).pipe(
-      switchMap((vehicles) =>
-        vehicles.length === 0
-          ? of([])
-          : forkJoin(vehicles.map((vehicle) => this.getVehicle(vehicle.id))),
-      ),
-    );
   }
 
   getVehicle(id: number): Observable<VehicleDetail> {

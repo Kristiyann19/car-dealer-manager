@@ -262,20 +262,34 @@ public sealed class VehicleService : IVehicleService
             vehicle.CostEntries.OrderBy(entry => entry.Id).Select(MapCostEntry).ToList(),
             financialCalculator.Calculate(vehicle));
 
-    private static VehicleListItemResponse MapListItem(Vehicle vehicle)
-        => new(
+    private VehicleListItemResponse MapListItem(Vehicle vehicle)
+    {
+        var analysis = financialCalculator.Calculate(vehicle);
+
+        return new VehicleListItemResponse(
             vehicle.Id,
             vehicle.Status,
             vehicle.Brand,
             vehicle.Model,
             vehicle.Year,
             vehicle.Vin,
+            vehicle.SourceCountry,
+            vehicle.PhysicalLocation,
             vehicle.CurrentBid,
             vehicle.MyBid,
             vehicle.AnalysisPurchasePrice,
             vehicle.ExpectedSalePrice,
             vehicle.ConservativeSalePrice,
-            vehicle.ArchivedAtUtc);
+            vehicle.ArchivedAtUtc,
+            new VehicleListFinancialSummaryResponse(
+                new VehicleListMaxBidResponse(
+                    analysis.ExpectedMaxBid.Status,
+                    analysis.ExpectedMaxBid.FinalMaxBid),
+                new VehicleListMaxBidResponse(
+                    analysis.ConservativeMaxBid.Status,
+                    analysis.ConservativeMaxBid.FinalMaxBid),
+                analysis.ExpectedScenario.RoiPercentage));
+    }
 
     private static VehicleCostEntryResponse MapCostEntry(VehicleCostEntry entry)
         => new(

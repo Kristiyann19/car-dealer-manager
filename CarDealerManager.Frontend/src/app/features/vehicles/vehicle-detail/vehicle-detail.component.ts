@@ -1,8 +1,20 @@
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  finalize,
+  map,
+  Observable,
+  of,
+  startWith,
+  Subject,
+  switchMap,
+} from 'rxjs';
 
 import {
   CostEntryCalculation,
@@ -16,6 +28,11 @@ import { translateUiMessage, UiLabelPipe } from '../../../core/localization/ui-l
 import { VehicleApiService } from '../../../core/services/vehicle-api.service';
 import { FinancialResultsComponent } from '../financial-results/financial-results.component';
 import { VehicleFormComponent } from '../vehicle-form/vehicle-form.component';
+
+type VehicleDetailPageState =
+  | { status: 'loading' }
+  | { status: 'loaded'; vehicle: VehicleDetail }
+  | { status: 'error'; message: string; notFound: boolean };
 
 @Component({
   selector: 'app-vehicle-detail',
@@ -35,6 +52,8 @@ export class VehicleDetailComponent implements OnInit {
   private readonly api = inject(VehicleApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly reloadRequests = new Subject<void>();
 
   readonly categories: VehicleCostCategory[] = [
     'AuctionFee',
@@ -64,59 +83,78 @@ export class VehicleDetailComponent implements OnInit {
     notes: this.fb.control<string | null>(null, Validators.maxLength(2000)),
   });
 
-  vehicle: VehicleDetail | null = null;
-  loading = true;
-  savingVehicle = false;
-  savingCost = false;
-  error = '';
-  costError = '';
-  showCostForm = false;
-  editingCostId: number | null = null;
+  readonly pageState = signal<VehicleDetailPageState>({ status: 'loading' });
+  readonly vehicle = computed(() => {
+    const state = this.pageState();
+    return state.status === 'loaded' ? state.vehicle : null;
+  });
+  readonly pageError = computed(() => {
+    const state = this.pageState();
+    return state.status === 'error' ? state : null;
+  });
+  readonly activeEstimatedCosts = computed(() =>
+    (this.vehicle()?.costEntries ?? []).filter(
+      (entry) => entry.kind === 'Estimated' && entry.archivedAtUtc === null,
+    ),
+  );
+  readonly archivedEstimatedCosts = computed(() =>
+    (this.vehicle()?.costEntries ?? []).filter(
+      (entry) => entry.kind === 'Estimated' && entry.archivedAtUtc !== null,
+    ),
+  );
+  readonly canEdit = computed(() => this.vehicle()?.archivedAtUtc === null);
+  readonly savingVehicle = signal(false);
+  readonly savingCost = signal(false);
+  readonly actionError = signal('');
+  readonly costError = signal('');
+  readonly showCostForm = signal(false);
+  readonly editingCostId = signal<number | null>(null);
 
   private vehicleId = 0;
 
-  get activeEstimatedCosts(): VehicleCostEntry[] {
-    return (this.vehicle?.costEntries ?? []).filter(
-      (entry) => entry.kind === 'Estimated' && entry.archivedAtUtc === null,
-    );
-  }
-
-  get archivedEstimatedCosts(): VehicleCostEntry[] {
-    return (this.vehicle?.costEntries ?? []).filter(
-      (entry) => entry.kind === 'Estimated' && entry.archivedAtUtc !== null,
-    );
-  }
-
-  get canEdit(): boolean {
-    return !!this.vehicle && this.vehicle.archivedAtUtc === null;
-  }
-
   ngOnInit(): void {
-    this.vehicleId = Number(this.route.snapshot.paramMap.get('id'));
-    if (!Number.isInteger(this.vehicleId) || this.vehicleId <= 0) {
-      this.error = 'Невалиден идентификатор на автомобил.';
-      this.loading = false;
-      return;
-    }
-    this.load(true);
+    this.route.paramMap
+      .pipe(
+        map((params) => params.get('id')),
+        distinctUntilChanged(),
+        switchMap((idValue) => {
+          const id = Number(idValue);
+          if (!Number.isInteger(id) || id <= 0) {
+            this.vehicleId = 0;
+            return of<VehicleDetailPageState>({
+              status: 'error',
+              message: 'Невалиден идентификатор на автомобил.',
+              notFound: true,
+            });
+          }
+
+          this.vehicleId = id;
+          return this.reloadRequests.pipe(
+            startWith(undefined),
+            switchMap(() => this.loadVehicle(id)),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((state) => this.pageState.set(state));
   }
 
   saveVehicle(request: VehicleUpsertRequest): void {
-    this.savingVehicle = true;
-    this.error = '';
+    this.savingVehicle.set(true);
+    this.actionError.set('');
     this.api
       .updateVehicle(this.vehicleId, request)
-      .pipe(finalize(() => (this.savingVehicle = false)))
+      .pipe(finalize(() => this.savingVehicle.set(false)))
       .subscribe({
-        next: () => this.load(false),
+        next: (vehicle) => this.pageState.set({ status: 'loaded', vehicle }),
         error: (error) =>
-          (this.error = this.errorMessage(error, 'Автомобилът не можа да бъде запазен.')),
+          this.actionError.set(this.errorMessage(error, 'Автомобилът не можа да бъде запазен.')),
       });
   }
 
   startAddCost(): void {
-    this.editingCostId = null;
-    this.costError = '';
+    this.editingCostId.set(null);
+    this.costError.set('');
     this.costForm.reset({
       category: 'Transport',
       description: '',
@@ -128,12 +166,12 @@ export class VehicleDetailComponent implements OnInit {
       includedInAnalysis: true,
       notes: null,
     });
-    this.showCostForm = true;
+    this.showCostForm.set(true);
   }
 
   startEditCost(cost: VehicleCostEntry): void {
-    this.editingCostId = cost.id;
-    this.costError = '';
+    this.editingCostId.set(cost.id);
+    this.costError.set('');
     this.costForm.reset({
       category: cost.category,
       description: cost.description,
@@ -145,13 +183,13 @@ export class VehicleDetailComponent implements OnInit {
       includedInAnalysis: cost.includedInAnalysis,
       notes: cost.notes,
     });
-    this.showCostForm = true;
+    this.showCostForm.set(true);
   }
 
   cancelCostEdit(): void {
-    this.showCostForm = false;
-    this.editingCostId = null;
-    this.costError = '';
+    this.showCostForm.set(false);
+    this.editingCostId.set(null);
+    this.costError.set('');
   }
 
   saveCost(): void {
@@ -162,42 +200,42 @@ export class VehicleDetailComponent implements OnInit {
 
     const request = this.costForm.getRawValue();
     if (request.amount === 0 && (request.purchasePricePercentage ?? 0) === 0) {
-      this.costError = 'Въведете фиксирана сума, процент от покупната цена или и двете.';
+      this.costError.set('Въведете фиксирана сума, процент от покупната цена или и двете.');
       return;
     }
 
-    this.savingCost = true;
-    this.costError = '';
-    const operation = this.editingCostId
-      ? this.api.updateEstimatedCost(this.vehicleId, this.editingCostId, request)
+    this.savingCost.set(true);
+    this.costError.set('');
+    const editingCostId = this.editingCostId();
+    const operation = editingCostId
+      ? this.api.updateEstimatedCost(this.vehicleId, editingCostId, request)
       : this.api.addEstimatedCost(this.vehicleId, request);
 
-    operation.pipe(finalize(() => (this.savingCost = false))).subscribe({
+    operation.pipe(finalize(() => this.savingCost.set(false))).subscribe({
       next: () => {
         this.cancelCostEdit();
-        this.load(false);
+        this.reloadRequests.next();
       },
       error: (error) =>
-        (this.costError = this.errorMessage(error, 'Разходът не можа да бъде запазен.')),
+        this.costError.set(this.errorMessage(error, 'Разходът не можа да бъде запазен.')),
     });
   }
 
   toggleIncluded(cost: VehicleCostEntry, includedInAnalysis: boolean): void {
-    this.savingCost = true;
-    this.costError = '';
+    this.savingCost.set(true);
+    this.costError.set('');
     this.api
       .updateEstimatedCost(this.vehicleId, cost.id, {
         ...this.toCostRequest(cost),
         includedInAnalysis,
       })
-      .pipe(finalize(() => (this.savingCost = false)))
+      .pipe(finalize(() => this.savingCost.set(false)))
       .subscribe({
-        next: () => this.load(false),
+        next: () => this.reloadRequests.next(),
         error: (error) =>
-          (this.costError = this.errorMessage(
-            error,
-            'Включването в сметката не можа да бъде обновено.',
-          )),
+          this.costError.set(
+            this.errorMessage(error, 'Включването в сметката не можа да бъде обновено.'),
+          ),
       });
   }
 
@@ -206,41 +244,43 @@ export class VehicleDetailComponent implements OnInit {
       return;
     }
 
-    this.savingCost = true;
-    this.costError = '';
+    this.savingCost.set(true);
+    this.costError.set('');
     this.api
       .archiveEstimatedCost(this.vehicleId, cost.id)
-      .pipe(finalize(() => (this.savingCost = false)))
+      .pipe(finalize(() => this.savingCost.set(false)))
       .subscribe({
-        next: () => this.load(false),
+        next: () => this.reloadRequests.next(),
         error: (error) =>
-          (this.costError = this.errorMessage(error, 'Разходът не можа да бъде архивиран.')),
+          this.costError.set(this.errorMessage(error, 'Разходът не можа да бъде архивиран.')),
       });
   }
 
   breakdownFor(costId: number): CostEntryCalculation | null {
     return (
-      this.vehicle?.financialAnalysis.estimatedCostsAtAnalysisPrice?.entries.find(
+      this.vehicle()?.financialAnalysis.estimatedCostsAtAnalysisPrice?.entries.find(
         (entry) => entry.costEntryId === costId,
       ) ?? null
     );
   }
 
-  private load(showSpinner: boolean): void {
-    if (showSpinner) {
-      this.loading = true;
-    }
-    this.api
-      .getVehicle(this.vehicleId)
-      .pipe(finalize(() => (this.loading = false)))
-      .subscribe({
-        next: (vehicle) => {
-          this.vehicle = vehicle;
-          this.error = '';
-        },
-        error: (error) =>
-          (this.error = this.errorMessage(error, 'Автомобилът не можа да бъде зареден.')),
-      });
+  private loadVehicle(id: number): Observable<VehicleDetailPageState> {
+    this.pageState.set({ status: 'loading' });
+    this.actionError.set('');
+
+    return this.api.getVehicle(id).pipe(
+      map((vehicle): VehicleDetailPageState => ({ status: 'loaded', vehicle })),
+      catchError((error: unknown) => {
+        const notFound = error instanceof HttpErrorResponse && error.status === 404;
+        return of<VehicleDetailPageState>({
+          status: 'error',
+          message: notFound
+            ? 'Няма автомобил с този идентификатор.'
+            : this.errorMessage(error, 'Автомобилът не можа да бъде зареден.'),
+          notFound,
+        });
+      }),
+    );
   }
 
   private toCostRequest(cost: VehicleCostEntry): EstimatedCostEntryUpsertRequest {
@@ -257,10 +297,11 @@ export class VehicleDetailComponent implements OnInit {
     };
   }
 
-  private errorMessage(
-    error: { error?: { detail?: string; title?: string } },
-    fallback: string,
-  ): string {
+  private errorMessage(error: unknown, fallback: string): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return fallback;
+    }
+
     return translateUiMessage(error.error?.detail ?? error.error?.title, fallback);
   }
 }

@@ -41,12 +41,26 @@ export interface VehicleListItem {
   model: string;
   year: number;
   vin: string | null;
+  sourceCountry: string | null;
+  physicalLocation: string | null;
   currentBid: number | null;
   myBid: number | null;
   analysisPurchasePrice: number | null;
   expectedSalePrice: number | null;
   conservativeSalePrice: number | null;
   archivedAtUtc: string | null;
+  financialSummary: VehicleListFinancialSummary;
+}
+
+export interface VehicleListFinancialSummary {
+  expectedMaxBid: VehicleListMaxBid;
+  conservativeMaxBid: VehicleListMaxBid;
+  expectedRoiPercentage: number | null;
+}
+
+export interface VehicleListMaxBid {
+  status: MaxBidStatus;
+  finalMaxBid: number | null;
 }
 
 export interface VehicleCostEntry {
@@ -132,7 +146,7 @@ export interface FinancialCalculationResult {
   conservativeMaxBid: MaxBidCalculation;
 }
 
-export interface VehicleDetail extends VehicleListItem {
+export interface VehicleDetail extends Omit<VehicleListItem, 'financialSummary'> {
   mileage: number | null;
   engine: string | null;
   fuelType: FuelType | null;

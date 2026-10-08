@@ -8,129 +8,143 @@
 </div>
 
 <div class="list-toolbar">
-  <span>{{ vehicles.length }} {{ vehicles.length === 1 ? 'автомобил' : 'автомобила' }}</span>
+  @if (pageState().status === 'loaded') {
+    <span>{{ vehicles().length }} {{ vehicles().length === 1 ? 'автомобил' : 'автомобила' }}</span>
+  } @else {
+    <span>—</span>
+  }
   <label class="toggle-label">
     <input
       type="checkbox"
-      [checked]="includeArchived"
+      [checked]="includeArchived()"
       (change)="setIncludeArchived($any($event.target).checked)"
     />
     Покажи архивираните
   </label>
 </div>
 
-@if (error) {
-  <div class="alert alert-error" role="alert">{{ error }}</div>
-}
-
-@if (loading) {
-  <div class="empty-state">
-    <span class="spinner"></span>
-    <p>Зареждане на автомобилите…</p>
-  </div>
-} @else if (vehicles.length === 0) {
-  <div class="empty-state">
-    <div class="empty-icon">◇</div>
-    <h2>{{ includeArchived ? 'Все още няма автомобили' : 'Няма активни автомобили' }}</h2>
-    <p>Добавете автомобил, за да започнете оценка за покупка.</p>
-    <a class="button button-primary" routerLink="/vehicles/new">Добави автомобил</a>
-  </div>
-} @else {
-  <div class="table-wrap vehicle-table-wrap">
-    <table class="data-table vehicle-table">
-      <thead>
-        <tr>
-          <th>Автомобил</th>
-          <th>Статус</th>
-          <th>Източник</th>
-          <th class="numeric">Текуща оферта</th>
-          <th class="numeric">Цена за анализ</th>
-          <th class="numeric">Очаквана продажна цена</th>
-          <th class="numeric max-column">Очакван MAX BID</th>
-          <th class="numeric max-column">Консервативен MAX BID</th>
-          <th class="numeric">Очакван ROI</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (vehicle of vehicles; track vehicle.id) {
-          <tr [class.archived-row]="vehicle.archivedAtUtc">
-            <td>
-              <strong>{{ vehicle.brand }} {{ vehicle.model }}</strong>
-              <small
-                >{{ vehicle.year }}
-                @if (vehicle.vin) {
-                  · {{ vehicle.vin }}
-                }
-              </small>
-            </td>
-            <td>
-              <span class="status-badge">{{ vehicle.status | uiLabel: 'vehicleStatus' }}</span>
-              @if (vehicle.archivedAtUtc) {
-                <span class="archived-badge">Архивиран</span>
-              }
-            </td>
-            <td>
-              <span>{{ vehicle.sourceCountry || '—' }}</span>
-              <small>{{ vehicle.physicalLocation || '' }}</small>
-            </td>
-            <td class="numeric">
-              {{
-                vehicle.currentBid != null
-                  ? (vehicle.currentBid | currency: 'EUR' : 'symbol' : '1.0-2')
-                  : '—'
-              }}
-            </td>
-            <td class="numeric">
-              {{
-                vehicle.analysisPurchasePrice != null
-                  ? (vehicle.analysisPurchasePrice | currency: 'EUR' : 'symbol' : '1.0-2')
-                  : '—'
-              }}
-            </td>
-            <td class="numeric">
-              {{
-                vehicle.expectedSalePrice != null
-                  ? (vehicle.expectedSalePrice | currency: 'EUR' : 'symbol' : '1.0-2')
-                  : '—'
-              }}
-            </td>
-            <td class="numeric max-value">
-              @if (vehicle.financialAnalysis.expectedMaxBid.finalMaxBid != null) {
-                {{
-                  vehicle.financialAnalysis.expectedMaxBid.finalMaxBid
-                    | currency: 'EUR' : 'symbol' : '1.0-2'
-                }}
-              } @else {
-                <span class="subtle-status">{{
-                  vehicle.financialAnalysis.expectedMaxBid.status | uiLabel: 'maxBidStatus'
-                }}</span>
-              }
-            </td>
-            <td class="numeric max-value">
-              @if (vehicle.financialAnalysis.conservativeMaxBid.finalMaxBid != null) {
-                {{
-                  vehicle.financialAnalysis.conservativeMaxBid.finalMaxBid
-                    | currency: 'EUR' : 'symbol' : '1.0-2'
-                }}
-              } @else {
-                <span class="subtle-status">{{
-                  vehicle.financialAnalysis.conservativeMaxBid.status | uiLabel: 'maxBidStatus'
-                }}</span>
-              }
-            </td>
-            <td class="numeric">
-              {{
-                vehicle.financialAnalysis.expectedScenario.roiPercentage != null
-                  ? (vehicle.financialAnalysis.expectedScenario.roiPercentage | number: '1.2-4') +
-                    '%'
-                  : '—'
-              }}
-            </td>
-            <td><a class="text-action" [routerLink]="['/vehicles', vehicle.id]">Отвори →</a></td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+@switch (pageState().status) {
+  @case ('loading') {
+    <div class="empty-state">
+      <span class="spinner"></span>
+      <p>Зареждане на автомобилите…</p>
+    </div>
+  }
+  @case ('error') {
+    <div class="empty-state" role="alert">
+      <div class="empty-icon">!</div>
+      <h2>Възникна грешка</h2>
+      <p>{{ errorMessage() }}</p>
+      <button class="button button-primary" type="button" (click)="load()">Опитай отново</button>
+    </div>
+  }
+  @case ('loaded') {
+    @if (vehicles().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">◇</div>
+        <h2>Няма добавени автомобили.</h2>
+        <p>Добавете автомобил, за да започнете оценка за покупка.</p>
+        <a class="button button-primary" routerLink="/vehicles/new">Добави автомобил</a>
+      </div>
+    } @else {
+      <div class="table-wrap vehicle-table-wrap">
+        <table class="data-table vehicle-table">
+          <thead>
+            <tr>
+              <th>Автомобил</th>
+              <th>Статус</th>
+              <th>Източник</th>
+              <th class="numeric">Текуща оферта</th>
+              <th class="numeric">Цена за анализ</th>
+              <th class="numeric">Очаквана продажна цена</th>
+              <th class="numeric max-column">Очакван MAX BID</th>
+              <th class="numeric max-column">Консервативен MAX BID</th>
+              <th class="numeric">Очакван ROI</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (vehicle of vehicles(); track vehicle.id) {
+              <tr [class.archived-row]="vehicle.archivedAtUtc">
+                <td>
+                  <strong>{{ vehicle.brand }} {{ vehicle.model }}</strong>
+                  <small
+                    >{{ vehicle.year }}
+                    @if (vehicle.vin) {
+                      · {{ vehicle.vin }}
+                    }
+                  </small>
+                </td>
+                <td>
+                  <span class="status-badge">{{ vehicle.status | uiLabel: 'vehicleStatus' }}</span>
+                  @if (vehicle.archivedAtUtc) {
+                    <span class="archived-badge">Архивиран</span>
+                  }
+                </td>
+                <td>
+                  <span>{{ vehicle.sourceCountry || '—' }}</span>
+                  <small>{{ vehicle.physicalLocation || '' }}</small>
+                </td>
+                <td class="numeric">
+                  {{
+                    vehicle.currentBid != null
+                      ? (vehicle.currentBid | currency: 'EUR' : 'symbol' : '1.0-2')
+                      : '—'
+                  }}
+                </td>
+                <td class="numeric">
+                  {{
+                    vehicle.analysisPurchasePrice != null
+                      ? (vehicle.analysisPurchasePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+                      : '—'
+                  }}
+                </td>
+                <td class="numeric">
+                  {{
+                    vehicle.expectedSalePrice != null
+                      ? (vehicle.expectedSalePrice | currency: 'EUR' : 'symbol' : '1.0-2')
+                      : '—'
+                  }}
+                </td>
+                <td class="numeric max-value">
+                  @if (vehicle.financialSummary.expectedMaxBid.finalMaxBid != null) {
+                    {{
+                      vehicle.financialSummary.expectedMaxBid.finalMaxBid
+                        | currency: 'EUR' : 'symbol' : '1.0-2'
+                    }}
+                  } @else {
+                    <span class="subtle-status">{{
+                      vehicle.financialSummary.expectedMaxBid.status | uiLabel: 'maxBidStatus'
+                    }}</span>
+                  }
+                </td>
+                <td class="numeric max-value">
+                  @if (vehicle.financialSummary.conservativeMaxBid.finalMaxBid != null) {
+                    {{
+                      vehicle.financialSummary.conservativeMaxBid.finalMaxBid
+                        | currency: 'EUR' : 'symbol' : '1.0-2'
+                    }}
+                  } @else {
+                    <span class="subtle-status">{{
+                      vehicle.financialSummary.conservativeMaxBid.status | uiLabel: 'maxBidStatus'
+                    }}</span>
+                  }
+                </td>
+                <td class="numeric">
+                  {{
+                    vehicle.financialSummary.expectedRoiPercentage != null
+                      ? (vehicle.financialSummary.expectedRoiPercentage | number: '1.2-4') + '%'
+                      : '—'
+                  }}
+                </td>
+                <td>
+                  <a class="text-action" [routerLink]="['/vehicles', vehicle.id]">Отвори →</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
 }

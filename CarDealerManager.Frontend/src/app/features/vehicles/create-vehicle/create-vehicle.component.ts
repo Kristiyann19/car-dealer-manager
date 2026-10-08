@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
@@ -16,18 +16,18 @@ export class CreateVehicleComponent {
   private readonly api = inject(VehicleApiService);
   private readonly router = inject(Router);
 
-  saving = false;
-  error = '';
+  readonly saving = signal(false);
+  readonly error = signal('');
 
   create(request: VehicleUpsertRequest): void {
-    this.saving = true;
-    this.error = '';
+    this.saving.set(true);
+    this.error.set('');
     this.api
       .createVehicle(request)
-      .pipe(finalize(() => (this.saving = false)))
+      .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: (vehicle) => void this.router.navigate(['/vehicles', vehicle.id]),
-        error: (error) => (this.error = this.errorMessage(error)),
+        error: (error) => this.error.set(this.errorMessage(error)),
       });
   }
 

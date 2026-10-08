@@ -18,7 +18,9 @@ public sealed class VehicleRepository : IVehicleRepository
         bool includeArchived,
         CancellationToken cancellationToken)
     {
-        var query = dbContext.Vehicles.AsNoTracking();
+        var query = dbContext.Vehicles
+            .Include(vehicle => vehicle.CostEntries)
+            .AsNoTracking();
         if (!includeArchived)
         {
             query = query.Where(vehicle => vehicle.ArchivedAtUtc == null);

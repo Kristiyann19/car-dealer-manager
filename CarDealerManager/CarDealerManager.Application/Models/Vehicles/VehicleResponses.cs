@@ -10,12 +10,24 @@ public sealed record VehicleListItemResponse(
     string Model,
     int Year,
     string? Vin,
+    string? SourceCountry,
+    string? PhysicalLocation,
     decimal? CurrentBid,
     decimal? MyBid,
     decimal? AnalysisPurchasePrice,
     decimal? ExpectedSalePrice,
     decimal? ConservativeSalePrice,
-    DateTimeOffset? ArchivedAtUtc);
+    DateTimeOffset? ArchivedAtUtc,
+    VehicleListFinancialSummaryResponse FinancialSummary);
+
+public sealed record VehicleListFinancialSummaryResponse(
+    VehicleListMaxBidResponse ExpectedMaxBid,
+    VehicleListMaxBidResponse ConservativeMaxBid,
+    decimal? ExpectedRoiPercentage);
+
+public sealed record VehicleListMaxBidResponse(
+    MaxBidStatus Status,
+    decimal? FinalMaxBid);
 
 public sealed record VehicleCostEntryResponse(
     int Id,
